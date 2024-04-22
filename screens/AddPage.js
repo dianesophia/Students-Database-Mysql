@@ -34,7 +34,7 @@ const AddPage = ({ navigation }) => {
       setFirstname('');
       setCourse('');
       setLevel('');
-      navigation.navigate("Home", { newStudent: result }); // Pass the new student data to the Home screen
+      navigation.navigate("Home", { newStudent: result }); 
     } catch (error) {
       console.error("Error adding student:", error);
       if (error.code === 'ER_DUP_ENTRY') {

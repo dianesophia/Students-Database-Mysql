@@ -61,18 +61,20 @@ app.delete("/students/:id", (req, res) => {
   });
 });
 
+
 app.put("/students/:id", (req, res) => {
-  let id = req.params.id;
-  let data = req.body;
-  let sql = "UPDATE `students` SET `idno`=?, `lastname`=?, `firstname`=?, `course`=?, `level`=? WHERE `id`=?";
-  let values = [data.idno, data.lastname, data.firstname, data.course, data.level, id];
+  const id = req.params.id;
+  const updatedStudent = req.body;
+  const sql = "UPDATE students SET idno=?, lastname=?, firstname=?, course=?, level=? WHERE id=?";
+  const values = [updatedStudent.idno, updatedStudent.lastname, updatedStudent.firstname, updatedStudent.course, updatedStudent.level, id];
+  
   db.query(sql, values, (err, results, fields) => {
     if (err) {
-      console.log("Query Error");
-      res.status(500).json(err);
+      console.error("Error updating student:", err);
+      res.status(500).json({ error: 'Failed to update student' });
       return;
     }
-    res.status(200).json(results);
+    res.status(200).json({ message: 'Student updated successfully' });
   });
 });
 

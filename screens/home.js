@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, FlatList, TouchableOpacity, Modal, Alert, TextInput } from 'react-native';
 import Header from './header';
+import UpdatePage from './UpdatePage';
 
 const Home = ({ route, navigation }) => {
   const [students, setStudents] = useState([]);
@@ -52,9 +53,18 @@ const Home = ({ route, navigation }) => {
     setModal(false);
   }
 
-  // Function to handle addition of new student
   const handleAddStudent = (newStudent) => {
     setStudents(prevStudents => [...prevStudents, newStudent]);
+  };
+
+  const handleUpdateStudent = (updatedStudent) => {
+    // Update the student list with the updated student data
+    setStudents(prevStudents => prevStudents.map(student => {
+      if (student.id === updatedStudent.id) {
+        return updatedStudent;
+      }
+      return student;
+    }));
   };
   
   const renderItem = ({ item }) => (
@@ -65,7 +75,7 @@ const Home = ({ route, navigation }) => {
     </TouchableOpacity>
   );
 
-  // Filter students based on the search query
+  
   const filteredStudents = students.filter(student => {
     const fullName = `${student.firstname} ${student.lastname}`;
     return fullName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -91,32 +101,47 @@ const Home = ({ route, navigation }) => {
           contentContainerStyle={styles.flatListContainer}
         />
 
-        <Modal
-          animationType='slide'
-          transparent={true}
-          visible={modal}
-          onRequestClose={closeModal}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text>ID: {selectedStudent.idno}</Text>
-              <Text>Last Name: {selectedStudent.lastname}</Text>
-              <Text>First Name: {selectedStudent.firstname}</Text>
-              <Text>Course: {selectedStudent.course}</Text>
-              <Text>Level: {selectedStudent.level}</Text>
+          <Modal
+            animationType='slide'
+            transparent={true}
+            visible={modal}
+            onRequestClose={closeModal}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text>ID: {selectedStudent.idno}</Text>
+                <Text>Last Name: {selectedStudent.lastname}</Text>
+                <Text>First Name: {selectedStudent.firstname}</Text>
+                <Text>Course: {selectedStudent.course}</Text>
+                <Text>Level: {selectedStudent.level}</Text>
 
-              <View style={styles.modalButtonsContainer}>
-                <TouchableOpacity onPress={() => handleDelete()} style={styles.modalButton}>
-                  <Text style={styles.buttonText}>Delete</Text>
-                </TouchableOpacity>
+                <View style={styles.modalButtonsContainer}>
+                  <TouchableOpacity onPress={() => handleDelete()} style={styles.modalButton}>
+                    <Text style={styles.buttonText}>Delete</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity  
+                      onPress={() => {
+                        navigation.navigate("Update Page", { 
+                          studentId: selectedStudent.idno, // Pass studentId instead of id
+                          handleUpdateStudent,
+                          selectedStudentData: selectedStudent // Pass the selected student's data
+                        });
+                          closeModal(); // Close the modal
+                      }}
+                      style={styles.modalButton}
+                  >
+                      <Text style={styles.buttonText}>Update</Text>
+                  </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => closeModal()} style={[styles.modalButton, styles.cancelButton]}>
-                  <Text style={styles.buttonText}>Close</Text>
-                </TouchableOpacity>
+
+
+                  <TouchableOpacity onPress={() => closeModal()} style={[styles.modalButton, styles.cancelButton]}>
+                    <Text style={styles.buttonText}>Close</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
-        </Modal>
+          </Modal>
 
       </View>
 
