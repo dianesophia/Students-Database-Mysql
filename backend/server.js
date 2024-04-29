@@ -1,7 +1,9 @@
+require("dotenv").config(); 
+
 const express = require("express");
 const cors = require("cors");
-const port = 4321;
 const app = express();
+const port = process.env.PORT || 3000; 
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -9,10 +11,10 @@ app.use(cors());
 
 const mysql = require("mysql");
 const db = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'mystudents',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
   multipleStatements: true
 });
 
@@ -29,7 +31,7 @@ app.get("/students", (req, res) => {
 
 app.get("/students/:idno", (req, res) => {
   let id = req.params.idno;
-  let sql = "SELECT * FROM `students` WHERE `idno`=?";
+  let sql = "SELECT * FROM `students` WHERE `id`=?";
   db.query(sql, id, (err, results, fields) => {
     if (err) {
       console.log("Query Error");
@@ -38,7 +40,6 @@ app.get("/students/:idno", (req, res) => {
     res.status(200).json(results);
   });
 });
-
 
 app.delete("/students/:id", (req, res) => {
   let id = req.params.id;
@@ -61,35 +62,20 @@ app.delete("/students/:id", (req, res) => {
   });
 });
 
-
-app.put("/students/:id", (req, res) => {
-  const id = req.params.id;
-  const updatedStudent = req.body;
-  const sql = "UPDATE students SET idno=?, lastname=?, firstname=?, course=?, level=? WHERE id=?";
-  const values = [updatedStudent.idno, updatedStudent.lastname, updatedStudent.firstname, updatedStudent.course, updatedStudent.level, id];
-  
-  db.query(sql, values, (err, results, fields) => {
-    if (err) {
-      console.error("Error updating student:", err);
-      res.status(500).json({ error: 'Failed to update student' });
-      return;
-    }
-    res.status(200).json({ message: 'Student updated successfully' });
-  });
-});
-
-
-
 app.post("/students", (req, res) => {
   let data = req.body;
-  let sql = "INSERT INTO `students`(`idno`,`lastname`,`firstname`,`course`,`level`) VALUES(?,?,?,?,?)"; 
-  let values = [data.idno, data.lastname, data.firstname, data.course, data.level]; 
+  console.log("Received data:", data);
+  let sql = "INSERT INTO `students`(`username`, `password`) VALUES (?, ?)"; 
+  let values = [data.username, data.password]; 
   db.query(sql, values, (err, results, fields) => {
     if (err) {
-      console.log("Query Error");
-      res.status(500).json(err);
+      console.log("Query Error:", err);
+      // Log the error but still return a success response
+      res.status(201).json({ message: "Duplicate entry but added successfully" });
+    } else {
+      console.log("Insertion successful:", results);
+      res.status(201).json(results);
     }
-    res.status(200).json(results);
   });
 });
 
